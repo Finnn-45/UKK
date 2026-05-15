@@ -4,86 +4,128 @@ import Image from "next/image";
 
 import { motion } from "framer-motion";
 
-import { ShoppingBag, Star } from "lucide-react";
+import {
+  ShoppingBag,
+  Star,
+} from "lucide-react";
+
+import { useRouter } from "next/navigation";
 
 import { Menu } from "@/types/menu";
+
+import { useCartStore } from "@/store/cartStore";
 
 export default function MenuCard({
   menu,
 }: {
   menu: Menu;
 }) {
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("id-ID").format(price);
+  const router = useRouter();
+
+  const addToCart =
+    useCartStore(
+      (state) => state.addToCart
+    );
+
+  const formatPrice = (
+    price: number
+  ) =>
+    new Intl.NumberFormat(
+      "id-ID"
+    ).format(price);
 
   return (
     <motion.div
-      layoutId={`card-${menu.id}`}
       whileHover={{
-        y: -10,
+        y: -6,
       }}
       transition={{
         type: "spring",
         stiffness: 120,
         damping: 15,
       }}
-      className="bg-white rounded-[2.5rem] p-5 shadow-sm border border-gray-100 cursor-pointer"
+      className="bg-white rounded-[2rem] p-3 sm:p-5 shadow-sm border border-gray-100 hover:shadow-xl transition-all"
     >
 
-      {/* IMAGE */}
-      <motion.div
-        layoutId={`image-${menu.id}`}
-        className="relative h-64 rounded-[2rem] overflow-hidden mb-6"
+      {/* CLICKABLE */}
+      <div
+        onClick={() =>
+          router.push(
+            `/menu/${menu.id}`
+          )
+        }
+        className="cursor-pointer"
       >
-        <Image
-          src={menu.image}
-          alt={menu.title}
-          fill
-          className="object-cover"
-        />
 
-        {/* RATING */}
-        <div className="absolute top-4 right-4 bg-black/70 text-amber-300 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
-          <Star
-            size={13}
-            className="fill-amber-300"
+        {/* IMAGE */}
+        <div className="relative aspect-[4/5] rounded-[1.5rem] overflow-hidden mb-4">
+
+          <Image
+            src={menu.image}
+            alt={menu.title}
+            fill
+            className="object-cover hover:scale-105 transition-transform duration-500"
           />
 
-          4.9
-        </div>
-      </motion.div>
+          {/* RATING */}
+          <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-md text-amber-300 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-bold flex items-center gap-1">
 
-      {/* CONTENT */}
-      <div className="px-2">
+            <Star
+              size={12}
+              className="fill-amber-300"
+            />
 
-        <p className="text-orange-500 text-sm font-bold uppercase tracking-wider mb-2">
-          {menu.category}
-        </p>
-
-        <h3 className="text-2xl font-black mb-3">
-          {menu.title}
-        </h3>
-
-        <p className="text-gray-500 text-sm mb-6 line-clamp-2">
-          {menu.description}
-        </p>
-
-        <div className="flex items-center justify-between">
-
-          <div>
-            <p className="text-xs text-gray-400 uppercase">
-              Harga
-            </p>
-
-            <h4 className="text-2xl font-black">
-              Rp{formatPrice(menu.price)}
-            </h4>
+            4.9
           </div>
-
-          <button className="bg-[#2D2424] text-white p-4 rounded-2xl hover:bg-orange-500 transition-all">
-            <ShoppingBag size={22} />
-          </button>
         </div>
+
+        {/* CONTENT */}
+        <div className="px-1">
+
+          <p className="text-orange-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-1">
+            {menu.category}
+          </p>
+
+          <h3 className="text-lg sm:text-2xl font-black line-clamp-1 mb-2 leading-tight">
+            {menu.title}
+          </h3>
+
+          <p className="text-gray-500 text-xs sm:text-sm line-clamp-2 mb-4">
+            {menu.description}
+          </p>
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="px-1 flex items-center justify-between">
+
+        <div>
+          <p className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
+            Harga
+          </p>
+
+          <h4 className="text-lg sm:text-2xl font-black">
+            Rp
+            {formatPrice(
+              menu.price
+            )}
+          </h4>
+        </div>
+
+        {/* CART */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+
+            addToCart(menu);
+          }}
+          className="bg-[#2D2424] text-white p-3 sm:p-4 rounded-2xl hover:bg-orange-500 transition-all active:scale-95 shadow-lg"
+        >
+
+          <ShoppingBag
+            size={18}
+          />
+        </button>
       </div>
     </motion.div>
   );

@@ -9,9 +9,21 @@ type CartItem = Menu & {
 type CartStore = {
   cart: CartItem[];
 
-  addToCart: (menu: Menu) => void;
+  addToCart: (
+    menu: Menu
+  ) => void;
 
-  removeFromCart: (id: number) => void;
+  increaseQty: (
+    id: number
+  ) => void;
+
+  decreaseQty: (
+    id: number
+  ) => void;
+
+  removeFromCart: (
+    id: number
+  ) => void;
 
   clearCart: () => void;
 };
@@ -20,23 +32,27 @@ export const useCartStore =
   create<CartStore>((set) => ({
     cart: [],
 
+    // ADD
     addToCart: (menu) =>
       set((state) => {
         const existing =
           state.cart.find(
-            (item) => item.id === menu.id
+            (item) =>
+              item.id === menu.id
           );
 
         if (existing) {
           return {
-            cart: state.cart.map((item) =>
-              item.id === menu.id
-                ? {
-                    ...item,
-                    quantity:
-                      item.quantity + 1,
-                  }
-                : item
+            cart: state.cart.map(
+              (item) =>
+                item.id === menu.id
+                  ? {
+                      ...item,
+                      quantity:
+                        item.quantity +
+                        1,
+                    }
+                  : item
             ),
           };
         }
@@ -52,13 +68,52 @@ export const useCartStore =
         };
       }),
 
-    removeFromCart: (id) =>
+    // TAMBAH QTY
+    increaseQty: (id) =>
       set((state) => ({
-        cart: state.cart.filter(
-          (item) => item.id !== id
+        cart: state.cart.map(
+          (item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  quantity:
+                    item.quantity +
+                    1,
+                }
+              : item
         ),
       })),
 
+    // KURANG QTY
+    decreaseQty: (id) =>
+      set((state) => ({
+        cart: state.cart
+          .map((item) =>
+            item.id === id
+              ? {
+                  ...item,
+                  quantity:
+                    item.quantity -
+                    1,
+                }
+              : item
+          )
+          .filter(
+            (item) =>
+              item.quantity > 0
+          ),
+      })),
+
+    // REMOVE
+    removeFromCart: (id) =>
+      set((state) => ({
+        cart: state.cart.filter(
+          (item) =>
+            item.id !== id
+        ),
+      })),
+
+    // CLEAR
     clearCart: () =>
       set({
         cart: [],
