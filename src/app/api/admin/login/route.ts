@@ -4,8 +4,16 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 
 export async function POST(req: Request) {
+  const raw = await req.text()
 
-  const { email, password } = await req.json()
+  let parsed: any
+  try {
+    parsed = raw ? JSON.parse(raw) : {}
+  } catch (e) {
+    return NextResponse.json({ message: 'Invalid JSON', raw }, { status: 400 })
+  }
+
+  const { email, password } = parsed
 
   const user = await prisma.user.findUnique({
     where: { email }
@@ -30,11 +38,14 @@ export async function POST(req: Request) {
     )
   }
 
-  // Create JWT with role from database
+  // hardcode admin
+  const isAdmin = user.email === 'admin@gmail.com'
+
   const token = jwt.sign(
     {
       id: user.id,
-      role: user.role
+      isAdmin,
+      role: isAdmin ? 'ADMIN' : 'USER'
     },
     process.env.JWT_SECRET!,
     {
@@ -43,7 +54,8 @@ export async function POST(req: Request) {
   )
 
   const response = NextResponse.json({
-    message: 'Login berhasil'
+    message: 'Login berhasil',
+    token
   })
 
   response.cookies.set('token', token, {

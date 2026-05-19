@@ -2,7 +2,7 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
-import { CartProvider } from "@/context/CartContext";
+import { AppProviders } from "@/context/AppProviders";
 
 export const metadata: Metadata = {
   title: "Rice & Shine",
@@ -17,10 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <CartProvider>
-          {children}
-        </CartProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );
 }
+

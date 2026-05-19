@@ -4,7 +4,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
 import { motion } from "framer-motion";
 
 import {
@@ -20,47 +21,40 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 import { Menu } from "@/types/menu";
+import { useCartStore } from "@/store/cartStore";
+import LoginModal from "@/components/LoginModal";
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-type CartItem = Menu & {
-  qty: number;
-};
 
 export default function HomeClient({
   menus,
 }: {
   menus: Menu[];
 }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const session = useSession()?.data;
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const { addToCart: addToCartStore } = useCartStore();
 
-  useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
-    }
-  }, []);
-
-  const addToCart = (menu: Menu) => {
-    const existingItem = cart.find((item) => item.id === menu.id);
-    let updatedCart: CartItem[];
-
-    if (existingItem) {
-      updatedCart = cart.map((item) =>
-        item.id === menu.id ? { ...item, qty: item.qty + 1 } : item
-      );
-    } else {
-      updatedCart = [...cart, { ...menu, qty: 1 }];
+  const handleAddToCart = (menu: Menu) => {
+    // Check if user is logged in
+    if (!session?.user) {
+      setShowLoginModal(true);
+      return;
     }
 
-    setCart(updatedCart);
-    localStorage.setItem("cart", JSON.stringify(updatedCart));
+    // If logged in, add to cart
+    addToCartStore(menu);
   };
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-[#2D2424] overflow-x-hidden">
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+      />
       
       {/* BACKGROUND DECORATION */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
@@ -79,19 +73,20 @@ export default function HomeClient({
           </span>
         </div>
 
-        <div className="flex items-center gap-4 md:gap-10">
+      <div className="flex items-center gap-4 md:gap-10">
           <div className="hidden lg:flex items-center gap-10 font-bold text-[13px] uppercase tracking-widest text-gray-500">
             <Link href="/menu" className="hover:text-orange-500 transition-all">Menu</Link>
             <a href="#" className="hover:text-orange-500 transition-all">About</a>
           </div>
 
-          <Link href="/cart">
-            <button className="relative bg-white p-3 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 active:scale-95 transition-transform">
-              <ShoppingBag size={20} className="text-gray-700" />
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white font-bold">
-                {cart.reduce((total, item) => total + item.qty, 0)}
-              </span>
-            </button>
+          <Link
+            href="/cart"
+            className="relative bg-white p-3 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 active:scale-95 transition-transform"
+          >
+            <ShoppingBag size={20} className="text-gray-700" />
+            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white font-bold">
+              {0}
+            </span>
           </Link>
         </div>
       </nav>
@@ -179,7 +174,7 @@ export default function HomeClient({
                     <h4 className="text-2xl md:text-4xl font-black">Rp{menus[0]?.price}</h4>
                   </div>
                   <button
-                    onClick={() => menus[0] && addToCart(menus[0])}
+                    onClick={() => menus[0] && handleAddToCart(menus[0])}
                     className="bg-orange-500 hover:bg-orange-400 text-white p-4 md:p-5 rounded-2xl md:rounded-3xl transition-all shadow-xl active:scale-95"
                   >
                     <ShoppingBag size={24} />
@@ -251,7 +246,7 @@ export default function HomeClient({
                       <p className="text-xl md:text-2xl font-black text-[#2D2424]">Rp{menu.price}</p>
                     </div>
                     <button
-                      onClick={() => addToCart(menu)}
+                      onClick={() => handleAddToCart(menu)}
                       className="bg-[#2D2424] text-white p-3.5 md:p-4 rounded-xl md:rounded-2xl hover:bg-orange-500 transition-all shadow-lg active:scale-90"
                     >
                       <ShoppingBag size={20} />

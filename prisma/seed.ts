@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient();
 
@@ -128,17 +129,19 @@ async function main() {
   });
   
 // 👤 SEED ADMIN USER (tambahan baru)
+  const hashed = await bcrypt.hash('admin123', 10)
+
   await prisma.user.upsert({
     where: { email: "admin@catering.com" },
-    update: {}, // Kalau udah ada, nggak di-update
+    update: { password: hashed }, // Pastikan password di-update ke versi hashed
     create: {
       name: "Admin Catering",
       email: "admin@catering.com",
-      password: "admin123", // ⚠️ Nanti production pake bcrypt!
+      password: hashed,
     },
   });
 
-  console.log("✅ Admin user created: admin@catering.com / admin123");
+  console.log("✅ Admin user created: admin@catering.com / admin123 (hashed)");
 }
 
 main()

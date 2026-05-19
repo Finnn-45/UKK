@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 
 // Kita fetch data menu langsung di client pake fetch API biar simpel
@@ -9,14 +9,14 @@ export default function EditMenuPage({ params }: { params: { id: string } }) {
   const [menu, setMenu] = useState<any>(null)
 
   // Load data saat pertama kali dibuka
-  useState(() => {
+  useEffect(() => {
     fetch(`/api/menu`)
       .then(res => res.json())
       .then(data => {
         const found = data.find((m: any) => m.id === parseInt(params.id))
         setMenu(found)
       })
-  })
+  }, [params.id])
 
   if (!menu) return <div>Loading...</div>
 

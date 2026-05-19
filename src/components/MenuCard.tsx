@@ -1,6 +1,8 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
 
 import { motion } from "framer-motion";
 
@@ -14,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { Menu } from "@/types/menu";
 
 import { useCartStore } from "@/store/cartStore";
+import LoginModal from "./LoginModal";
 
 export default function MenuCard({
   menu,
@@ -21,6 +24,8 @@ export default function MenuCard({
   menu: Menu;
 }) {
   const router = useRouter();
+  const session = useSession()?.data;
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const addToCart =
     useCartStore(
@@ -34,6 +39,17 @@ export default function MenuCard({
       "id-ID"
     ).format(price);
 
+  const handleAddToCart = () => {
+    // Check if user is logged in
+    if (!session?.user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    // If logged in, add to cart
+    addToCart(menu);
+  };
+
   return (
     <motion.div
       whileHover={{
@@ -46,6 +62,11 @@ export default function MenuCard({
       }}
       className="bg-white rounded-[2rem] p-3 sm:p-5 shadow-sm border border-gray-100 hover:shadow-xl transition-all"
     >
+      {/* Login Modal */}
+      <LoginModal 
+        isOpen={showLoginModal} 
+        onClose={() => setShowLoginModal(false)} 
+      />
 
       {/* CLICKABLE */}
       <div
@@ -116,8 +137,7 @@ export default function MenuCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-
-            addToCart(menu);
+            handleAddToCart();
           }}
           className="bg-[#2D2424] text-white p-3 sm:p-4 rounded-2xl hover:bg-orange-500 transition-all active:scale-95 shadow-lg"
         >

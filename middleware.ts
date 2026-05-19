@@ -9,8 +9,6 @@ export const config = {
     '/checkout/:path*',
     '/orders',
     '/orders/:path*',
-    '/cart',
-    '/cart/:path*',
   ],
 }
 
@@ -81,8 +79,8 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // kalau buka checkout/order/cart user tapi belum login
-  const isProtectedUserRoute = pathname === '/checkout' || pathname.startsWith('/checkout/') || pathname === '/orders' || pathname.startsWith('/orders/') || pathname === '/cart' || pathname.startsWith('/cart/')
+  // kalau buka checkout/order user tapi belum login - redirect ke login
+  const isProtectedUserRoute = pathname === '/checkout' || pathname.startsWith('/checkout/') || pathname === '/orders' || pathname.startsWith('/orders/')
   if (isProtectedUserRoute && !token) {
     // redirect ke login user (dibuat: /login)
     return NextResponse.redirect(new URL('/login', req.url))

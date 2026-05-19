@@ -11,7 +11,7 @@ interface CustomJWT extends JWT {
 }
 
 interface CustomSession extends Session {
-  user?: Session['user'] & {
+  user?: Session["user"] & {
     role?: string;
   };
 }
@@ -83,3 +83,4 @@ const handler = NextAuth({
 });
 
 export { handler as GET, handler as POST };
+

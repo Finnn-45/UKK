@@ -9,6 +9,8 @@ import {
 
 import { useCartStore } from "@/store/cartStore";
 
+
+
 export default function Navbar() {
 
   const cart = useCartStore(
