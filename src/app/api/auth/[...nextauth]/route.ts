@@ -46,6 +46,9 @@ const handler = NextAuth({
 
         if (!isPasswordValid) return null;
 
+        // Hanya customer/user biasa yang boleh masuk via halaman /login.
+        if (user.role === 'ADMIN') return null;
+
         return {
           id: user.id.toString(),
           name: user.name,

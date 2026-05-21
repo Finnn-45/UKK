@@ -62,32 +62,6 @@ export default function HomeClient({
         <div className="absolute bottom-[-5%] left-[-10%] w-[300px] md:w-[500px] h-[300px] md:h-[500px] bg-green-100 rounded-full blur-[80px] md:blur-[120px] opacity-60" />
       </div>
 
-      {/* NAVBAR */}
-      <nav className="relative z-50 flex items-center justify-between px-5 md:px-10 py-5 md:py-8 max-w-7xl mx-auto">
-        <div className="flex items-center gap-2 md:gap-3">
-          <div className="bg-gradient-to-tr from-amber-400 to-orange-500 p-2.5 md:p-3 rounded-xl md:rounded-2xl shadow-lg shadow-orange-200">
-            <Sun size={20} className="text-white" />
-          </div>
-          <span className="text-xl md:text-2xl font-black tracking-tight">
-            RICE<span className="text-orange-500">&</span>SHINE
-          </span>
-        </div>
-
-      <div className="flex items-center gap-4 md:gap-10">
-          <div className="hidden lg:flex items-center gap-10 font-bold text-[13px] uppercase tracking-widest text-gray-500">
-            <Link href="/menu" className="hover:text-orange-500 transition-all">Menu</Link>
-            <a href="#" className="hover:text-orange-500 transition-all">About</a>
-          </div>
-
-          <Link
-            href="/cart"
-            className="relative bg-white p-3 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 active:scale-95 transition-transform"
-          >
-            <ShoppingBag size={20} className="text-gray-700" />
-          </Link>
-        </div>
-      </nav>
-
       {/* HERO SECTION */}
       <main className="relative z-10 max-w-7xl mx-auto px-5 md:px-10 py-8 md:py-16 grid lg:grid-cols-2 gap-12 items-center">
         
@@ -211,12 +185,12 @@ export default function HomeClient({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
+          <div className="grid grid-cols-2 gap-4 sm:gap-5 md:gap-6 lg:grid-cols-3">
             {menus.map((menu) => (
               <motion.div
                 key={menu.id}
                 whileHover={{ y: -8 }}
-                className="group bg-white p-4 md:p-5 rounded-[2rem] md:rounded-[3rem] shadow-sm hover:shadow-2xl hover:shadow-orange-100/30 transition-all border border-gray-100"
+                className="group bg-white p-3 sm:p-4 md:p-5 rounded-[1.6rem] sm:rounded-[2rem] md:rounded-[3rem] shadow-sm hover:shadow-2xl hover:shadow-orange-100/30 transition-all border border-gray-100"
               >
                 <div className={cn("relative h-64 md:h-80 rounded-[1.8rem] md:rounded-[2.5rem] mb-6 overflow-hidden", menu.color)}>
                   <Image src={menu.image} alt={menu.title} fill className="object-cover group-hover:scale-110 transition-transform duration-700" />

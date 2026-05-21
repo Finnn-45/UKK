@@ -1,11 +1,17 @@
-# TODO
+# TODO - User Flow (No DB/Admin dulu)
 
-## Menu card full-screen modal (di klik card)
+- [x] Update `src/types/order.ts` untuk tambah field `address` dan `deliveryDate`.
 
-- [ ] Buat komponen `src/components/MenuFullScreenModal.tsx` (modal overlay full layar) yang menampilkan: foto besar, title, category, rating, harga, deskripsi + section tambahan biar tidak kosong.
-- [ ] Modal punya tombol close (X) dan aksi `Tambah ke Keranjang`.
-- [ ] Update `src/components/MenuCard.tsx`: saat card diklik, buka modal; tombol cart tetap stopPropagation.
-- [ ] Tambahkan logic supaya modal butuh session: kalau user belum login, tampilkan `LoginModal` (reuse yang sudah ada) atau tutup modal lalu login modal.
-- [ ] Cek layout & z-index supaya tidak konflik dengan `LoginModal`.
-- [ ] Jalankan `npm run lint` dan `npm run build` untuk memastikan compile.
+- [x] Update `src/app/(user)/checkout/CheckoutClient.tsx`:
+
+  - [ ] Tambah form input alamat + tanggal.
+  - [ ] Pastikan order object menyertakan `address` & `deliveryDate`.
+  - [ ] Simpan order ke `localStorage`.
+- [ ] Update `src/app/(user)/orders/page.tsx`:
+  - [x] Tampilkan alamat + tanggal.
+  - [x] Implement status progression otomatis via timer sampai `Selesai`.
+
+- [ ] Jalankan aplikasi dan test end-to-end: menu → cart → checkout → orders.
+
+
 

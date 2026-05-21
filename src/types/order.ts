@@ -14,8 +14,14 @@ export type OrderRecord = {
   createdAt: string
   paymentMethod: PaymentMethod
   note: string
+
+  // New: user input data for order fulfillment
+  address: string
+  deliveryDate: string
+
   items: OrderItem[]
   totalPrice: number
   totalItems: number
   status: OrderStatus
 }
+

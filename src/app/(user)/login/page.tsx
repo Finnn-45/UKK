@@ -37,7 +37,17 @@ export default function UserLoginPage() {
       return
     }
 
+    // Kalau sebelumnya user pernah login admin, buang cookie JWT admin supaya
+    // tidak ada redirect ke /admin.
+    // (Request kamu: user tetap belanja, tidak masuk halaman admin.)
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' })
+    } catch {
+      // ignore
+    }
+
     router.push(callbackUrl)
+
   }
 
   return (
@@ -69,9 +79,12 @@ export default function UserLoginPage() {
               Rice & <span className="text-orange-500">Shine</span>
             </h1>
             <p className="text-zinc-400 text-center text-xs font-semibold uppercase tracking-[0.15em] mt-1.5">
-              Premium Catering System
+              Premium Customer Login
             </p>
           </div>
+          <p className="text-center text-sm text-slate-500 mb-6">
+            Jika kamu admin, gunakan halaman <span className="font-semibold text-orange-500">/admin/login</span>.
+          </p>
 
           {/* ERROR MESSAGE (Animasi layout murni tanpa manipulasi opacity) */}
           {error && (

@@ -1,152 +1,178 @@
-"use client"; // Wajib pakai ini untuk usePathname
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  UtensilsCrossed, 
-  PlusCircle, 
-  Users, 
+import React, { useState } from "react";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  UtensilsCrossed,
+  PlusCircle,
+  Users,
   Settings,
-  Search
-} from 'lucide-react';
+  Search,
+  Bell,
+  ChevronDown,
+} from "lucide-react";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    setLoggingOut(true);
+    await fetch("/api/admin/logout", {
+      method: "POST",
+    });
+
+    router.push("/admin/login");
+  };
+
   return (
-    <div className="flex min-h-screen bg-[#F5F7FB]">
-      {/* Sidebar */}
-      <aside className="w-64 bg-[#0F172A] text-slate-400 hidden md:flex flex-col sticky top-0 h-screen shadow-xl">
-        {/* Branding */}
-        <div className="p-8 flex items-center gap-3">
-          <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold">
-            R
-          </div>
-          <span className="text-xl font-bold text-white tracking-tight">Rice & Shine</span>
-        </div>
+    <div className="min-h-screen bg-[#f3f4f6]">
+      {/* Gradient Top */}
+      <div className="fixed top-0 left-0 w-full h-64 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 -z-10" />
 
-        {/* Navigation Groups */}
-        <nav className="flex-1 px-4 space-y-8 overflow-y-auto pb-8">
-          
-          {/* Main Group */}
-          <div>
-            <p className="px-4 text-[10px] font-bold uppercase tracking-[2px] text-slate-500 mb-4">
-              Main Dashboard
-            </p>
-            <div className="space-y-1">
-              <SidebarItem 
-                href="/admin" 
-                icon={<LayoutDashboard size={18} />} 
-                label="Dashboard Overview" 
-              />
+      <div className="flex">
+        {/* SIDEBAR */}
+        <aside className="hidden lg:flex flex-col w-[280px] h-screen sticky top-0 bg-[#111827] text-white shadow-2xl">
+          {/* Logo */}
+          <div className="h-20 flex items-center px-8 border-b border-slate-800">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500 flex items-center justify-center font-bold text-lg">
+              R
+            </div>
+
+            <div className="ml-4">
+              <h1 className="font-bold text-xl">RiceAdmin</h1>
+              <p className="text-xs text-slate-400">Dashboard Panel</p>
             </div>
           </div>
 
-          {/* Menu Management Group */}
-          <div>
-            <p className="px-4 text-[10px] font-bold uppercase tracking-[2px] text-slate-500 mb-4">
-              Menu Management
-            </p>
-            <div className="space-y-1">
-              <SidebarItem 
-                href="/admin/menu" 
-                icon={<UtensilsCrossed size={18} />} 
-                label="All Menus" 
-              />
-              <SidebarItem 
-                href="/admin/create" 
-                icon={<PlusCircle size={18} />} 
-                label="Add New Menu" 
-              />
-            </div>
-          </div>
-
-          {/* System Group */}
-          <div>
-            <p className="px-4 text-[10px] font-bold uppercase tracking-[2px] text-slate-500 mb-4">
-              System Admin
-            </p>
-            <div className="space-y-1">
-              <SidebarItem 
-                href="/admin/users" 
-                icon={<Users size={18} />} 
-                label="Users List" 
-              />
-              <SidebarItem 
-                href="/admin/settings" 
-                icon={<Settings size={18} />} 
-                label="Settings" 
-              />
-            </div>
-          </div>
-
-        </nav>
-
-        {/* Footer Sidebar */}
-        <div className="p-6 border-t border-slate-800">
-          <div className="bg-slate-800/50 rounded-xl p-4 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold">
-              AD
-            </div>
-            <div className="overflow-hidden">
-              <p className="text-sm font-semibold text-white truncate">Arfin Desca</p>
-              <p className="text-xs text-slate-500 truncate">Administrator</p>
-            </div>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col relative">
-        {/* Top Navbar */}
-        <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-50">
-          <div className="flex items-center bg-slate-100 px-4 py-2 rounded-full w-80 border border-slate-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 transition-all">
-            <Search size={16} className="text-slate-400 mr-2" />
-            <input 
-              type="text" 
-              placeholder="Cari sesuatu..." 
-              className="bg-transparent outline-none text-sm w-full text-slate-600" 
+          {/* Menu */}
+          <nav className="flex-1 px-4 py-8 space-y-2 overflow-y-auto">
+            <SidebarItem
+              href="/admin"
+              icon={<LayoutDashboard size={18} />}
+              label="Dashboard"
+              active={pathname === "/admin"}
             />
-          </div>
-          <div className="flex items-center gap-4">
-            <button className="p-2 text-slate-400 hover:text-indigo-600 transition-colors">
-              🔔
+
+            <SidebarItem
+              href="/admin/menu"
+              icon={<UtensilsCrossed size={18} />}
+              label="Menu"
+              active={pathname === "/admin/menu"}
+            />
+
+            <SidebarItem
+              href="/admin/create"
+              icon={<PlusCircle size={18} />}
+              label="Tambah Menu"
+              active={pathname === "/admin/create"}
+            />
+
+            <SidebarItem
+              href="/admin/users"
+              icon={<Users size={18} />}
+              label="Users"
+              active={pathname === "/admin/users"}
+            />
+
+            <SidebarItem
+              href="/admin/settings"
+              icon={<Settings size={18} />}
+              label="Settings"
+              active={pathname === "/admin/settings"}
+            />
+          </nav>
+
+          {/* Footer */}
+          <div className="p-5 border-t border-slate-800">
+            <button
+              onClick={handleLogout}
+              className="w-full rounded-xl bg-slate-800 hover:bg-slate-700 transition py-3 text-sm font-semibold"
+            >
+              {loggingOut ? "Loading..." : "Logout"}
             </button>
           </div>
-        </header>
+        </aside>
 
-        {/* Content Section */}
-        <div className="flex-1">
+        {/* MAIN */}
+        <main className="flex-1 p-5 lg:p-8">
+          {/* NAVBAR */}
+          <div className="h-20 bg-white rounded-3xl shadow-sm border border-slate-200 flex items-center justify-between px-8 mb-8">
+            {/* Search */}
+            <div className="flex items-center gap-3 bg-slate-100 rounded-2xl px-5 py-3 w-[350px]">
+              <Search size={18} className="text-slate-400" />
+
+              <input
+                type="text"
+                placeholder="Type to search..."
+                className="bg-transparent outline-none text-sm w-full"
+              />
+            </div>
+
+            {/* Right */}
+            <div className="flex items-center gap-5">
+              <button className="w-11 h-11 rounded-full bg-slate-100 flex items-center justify-center">
+                <Bell size={18} />
+              </button>
+
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <h3 className="text-sm font-semibold text-slate-800">
+                    Arfin Desca
+                  </h3>
+
+                  <p className="text-xs text-slate-500">
+                    Administrator
+                  </p>
+                </div>
+
+                <div className="w-11 h-11 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold">
+                  AD
+                </div>
+
+                <ChevronDown size={18} className="text-slate-500" />
+              </div>
+            </div>
+          </div>
+
+          {/* CONTENT */}
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
 
-// Sub-component untuk Item Sidebar agar lebih bersih kodenya
-function SidebarItem({ href, icon, label }: { href: string, icon: React.ReactNode, label: string }) {
-  const pathname = usePathname();
-  const isActive = pathname === href;
-
+function SidebarItem({
+  href,
+  icon,
+  label,
+  active,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  label: string;
+  active: boolean;
+}) {
   return (
-    <Link 
-      href={href} 
-      className={`
-        flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group
-        ${isActive 
-          ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/20' 
-          : 'text-slate-400 hover:bg-slate-800 hover:text-white'
-        }
-      `}
+    <Link
+      href={href}
+      className={`flex items-center gap-3 px-5 py-3 rounded-2xl transition-all text-sm font-medium
+      ${
+        active
+          ? "bg-slate-700 text-white"
+          : "text-slate-400 hover:bg-slate-800 hover:text-white"
+      }`}
     >
-      <span className={`${isActive ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400'} transition-colors`}>
-        {icon}
-      </span>
+      {icon}
       {label}
-      {isActive && (
-        <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
-      )}
     </Link>
   );
 }

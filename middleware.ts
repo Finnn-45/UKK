@@ -52,13 +52,11 @@ async function verifyJwt(token: string, secret: string) {
 export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname.replace(/\/$/, '') || '/'
 
-  let token = req.cookies.get('token')?.value
-  const nextAuthCookie =
-    req.cookies.get('__Host-next-auth.session-token')?.value ||
-    req.cookies.get('__Secure-next-auth.session-token')?.value ||
-    req.cookies.get('next-auth.session-token')?.value
+  const token = req.cookies.get('token')?.value
 
-  if (!token && nextAuthCookie) token = nextAuthCookie
+  // Jangan jadikan next-auth session-token sebagai pengganti cookie JWT admin.
+  // Admin login memakai cookie 'token' (JWT) untuk akses /admin.
+  // Cookie next-auth untuk customer tidak boleh dipakai untuk otorisasi admin.
 
   const isAdminRoute = pathname.startsWith('/admin')
   const isAdminLoginPage = pathname === '/admin/login'

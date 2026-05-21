@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 
-import Navbar from "@/components/Navbar";
 import MenuCard from "@/components/MenuCard";
 import SearchBar from "@/components/SearchBar";
 
@@ -57,8 +56,6 @@ export default function MenuClient({
         <div className="absolute bottom-[-12%] left-[-8%] w-[320px] md:w-[420px] h-[320px] md:h-[420px] bg-slate-950 rounded-full blur-[140px] opacity-15" />
         <div className="absolute top-[35%] left-[-5%] w-60 h-60 bg-amber-200/60 rounded-full blur-3xl" />
       </div>
-
-      <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="mb-14 grid gap-10 lg:grid-cols-[1.4fr_0.9fr] items-start">

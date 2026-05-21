@@ -17,21 +17,30 @@ type OrderRecord = {
   createdAt: string
   paymentMethod: 'cash' | 'bank' | 'card'
   note: string
+  address: string
+  deliveryDate: string
   items: OrderItem[]
   totalPrice: number
   totalItems: number
   status: string
 }
 
+
 export default function CheckoutClient() {
   const router = useRouter()
   const { cart, clearCart } = useCartStore()
   const [method, setMethod] = useState<'cash' | 'bank' | 'card'>('cash')
   const [note, setNote] = useState('')
+  const [address, setAddress] = useState('')
+  const [deliveryDate, setDeliveryDate] = useState('')
   const [processing, setProcessing] = useState(false)
+
 
   const totalItems = cart.reduce((total, item) => total + item.quantity, 0)
   const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+
+  const canConfirm = cart.length > 0 && address.trim().length > 0 && !!deliveryDate
+
 
   function formatPrice(value: number) {
     return new Intl.NumberFormat('id-ID').format(value)
@@ -39,6 +48,17 @@ export default function CheckoutClient() {
 
   async function handleConfirm(e: FormEvent) {
     e.preventDefault()
+
+    if (!address.trim()) {
+      alert('Alamat harus diisi dulu.')
+      return
+    }
+
+    if (!deliveryDate) {
+      alert('Tanggal pemesanan harus dipilih.')
+      return
+    }
+
     setProcessing(true)
 
     const order: OrderRecord = {
@@ -46,6 +66,8 @@ export default function CheckoutClient() {
       createdAt: new Date().toISOString(),
       paymentMethod: method,
       note,
+      address,
+      deliveryDate,
       items: cart.map((item) => ({
         id: item.id,
         title: item.title,
@@ -56,6 +78,7 @@ export default function CheckoutClient() {
       totalItems,
       status: 'Menunggu konfirmasi',
     }
+
 
     await new Promise((resolve) => setTimeout(resolve, 600))
 
@@ -81,6 +104,7 @@ export default function CheckoutClient() {
   if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-[#F8F9FB] py-10">
+
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="rounded-4xl bg-white border border-slate-200 p-10 text-center shadow-sm">
             <p className="text-sm uppercase text-slate-400 mb-4">Checkout</p>
@@ -132,13 +156,45 @@ export default function CheckoutClient() {
         <div className="grid gap-8 lg:grid-cols-[1.7fr_1fr]">
           <section className="space-y-6">
             <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-xl font-semibold text-slate-900">Isi Data Pemesanan</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                Lengkapi alamat dan tanggal agar pesananmu bisa diproses.
+              </p>
+
+              <div className="mt-6 space-y-5">
+                <div>
+                  <label className="block text-sm font-medium text-slate-900">Alamat</label>
+                  <textarea
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    rows={4}
+                    placeholder="Contoh: Jl. Mawar No. 12, Kecamatan ..."
+                    className="mt-3 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-900">Tanggal Pemesanan</label>
+                  <input
+                    type="date"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    className="mt-3 w-full rounded-3xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm focus:border-orange-400 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between">
+
                 <div>
                   <h2 className="text-xl font-semibold text-slate-900">Metode Pembayaran</h2>
                   <p className="text-sm text-slate-500 mt-1">Pilih sesuai kenyamanan dan jenis pesananmu.</p>
                 </div>
                 <span className="text-sm text-slate-500">{totalItems} item</span>
               </div>
+
 
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 {[
@@ -161,6 +217,8 @@ export default function CheckoutClient() {
                   <button
                     key={option.key}
                     type="button"
+                    aria-pressed={method === option.key}
+
                     onClick={() => setMethod(option.key as 'cash' | 'bank' | 'card')}
                     className={`rounded-3xl border p-4 text-left transition-all ${
                       method === option.key
@@ -210,7 +268,8 @@ export default function CheckoutClient() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <button
                     type="submit"
-                    disabled={processing}
+                    disabled={!canConfirm || processing}
+
                     className="inline-flex items-center justify-center rounded-3xl bg-orange-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {processing ? 'Memproses...' : 'Konfirmasi dan Lanjutkan'}

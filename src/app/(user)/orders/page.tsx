@@ -3,6 +3,8 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 
+import { getStatusByProgress } from './orderStatus'
+
 type OrderItem = {
   id: number
   title: string
@@ -15,30 +17,41 @@ type OrderRecord = {
   createdAt: string
   paymentMethod: 'cash' | 'bank' | 'card'
   note: string
+  address: string
+  deliveryDate: string
   items: OrderItem[]
   totalPrice: number
   totalItems: number
   status: string
 }
 
+
 export default function OrdersPage() {
   const [orders, setOrders] = useState<OrderRecord[]>([])
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
-      return
-    }
+    if (typeof window === 'undefined') return
 
     try {
       const raw = localStorage.getItem('rice_orders')
       const parsed = raw ? JSON.parse(raw) : []
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setOrders(Array.isArray(parsed) ? parsed : [])
     } catch {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
       setOrders([])
     }
   }, [])
 
+
   const totalSpent = orders.reduce((sum, order) => sum + order.totalPrice, 0)
+
+  // Render status simulation based on createdAt.
+  const withComputedStatus = orders.map((order) => ({
+    ...order,
+    status: getStatusByProgress(order.createdAt),
+  }))
+
 
   return (
     <main className="min-h-screen bg-[#F8F9FB] py-10">
@@ -85,7 +98,8 @@ export default function OrdersPage() {
         ) : (
           <div className="grid gap-6 lg:grid-cols-[2.2fr_1fr]">
             <section className="space-y-6">
-              {orders.map((order) => (
+              {withComputedStatus.map((order) => (
+
                 <div key={order.id} className="rounded-4xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
@@ -98,9 +112,20 @@ export default function OrdersPage() {
                       })}</p>
                       <h2 className="text-2xl font-semibold text-slate-900">Order {order.id.replace('ORD-', '')}</h2>
                     </div>
-                    <span className="inline-flex rounded-full bg-emerald-100 px-4 py-2 text-sm font-semibold text-emerald-700">
+                    <span
+                      className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold ${
+                        order.status === 'Selesai'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : order.status === 'Dikirim'
+                          ? 'bg-blue-100 text-blue-700'
+                          : order.status === 'Dikemas'
+                          ? 'bg-amber-100 text-amber-700'
+                          : 'bg-slate-100 text-slate-700'
+                      }`}
+                    >
                       {order.status}
                     </span>
+
                   </div>
 
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -112,6 +137,13 @@ export default function OrdersPage() {
                       <p className="text-sm text-slate-500">Total Pesanan</p>
                       <p className="mt-2 text-xl font-bold text-orange-500">Rp {new Intl.NumberFormat('id-ID').format(order.totalPrice)}</p>
                     </div>
+
+                    <div className="rounded-3xl bg-slate-50 p-4 md:col-span-2">
+                      <p className="text-sm text-slate-500">Alamat & Tanggal</p>
+                      <p className="mt-2 font-semibold text-slate-900">{order.address}</p>
+                      <p className="mt-1 text-sm text-slate-600">Tanggal: {order.deliveryDate}</p>
+                    </div>
+
                   </div>
 
                   <div className="mt-6 border-t border-slate-200 pt-5">
@@ -134,6 +166,38 @@ export default function OrdersPage() {
                         <p className="mt-2">{order.note}</p>
                       </div>
                     )}
+
+                    {/* Simulasi langkah proses sesuai flow diagram (tanpa admin/DB). */}
+                    <div className="mt-4 rounded-3xl bg-white p-4 border border-slate-100">
+                      <p className="text-sm text-slate-500">Alur Proses</p>
+                      <ol className="mt-2 space-y-2 text-sm text-slate-700">
+                        <li>
+                          • Menunggu konfirmasi{' '}
+                          {order.status === 'Menunggu konfirmasi' && (
+                            <span className="text-orange-600 font-semibold">(aktif)</span>
+                          )}
+                        </li>
+                        <li>
+                          • Dikemas{' '}
+                          {order.status === 'Dikemas' && (
+                            <span className="text-orange-600 font-semibold">(aktif)</span>
+                          )}
+                        </li>
+                        <li>
+                          • Dikirim{' '}
+                          {order.status === 'Dikirim' && (
+                            <span className="text-orange-600 font-semibold">(aktif)</span>
+                          )}
+                        </li>
+                        <li>
+                          • Selesai{' '}
+                          {order.status === 'Selesai' && (
+                            <span className="text-emerald-600 font-semibold">(aktif)</span>
+                          )}
+                        </li>
+                      </ol>
+                    </div>
+
                   </div>
                 </div>
               ))}

@@ -56,7 +56,9 @@ export default function MenuCard({ menu }: { menu: Menu }) {
       <motion.div
         whileHover={{ y: -8 }}
         transition={{ type: "spring", stiffness: 120, damping: 16 }}
-        className="group bg-white/95 border border-slate-200 shadow-[0_24px_60px_rgba(15,23,42,0.08)] rounded-[2rem] overflow-hidden hover:-translate-y-1 hover:shadow-2xl transition-all duration-300"
+        className="group bg-white/95 border border-slate-200 shadow-[0_24px_60px_rgba(15,23,42,0.08)] rounded-[2rem] overflow-hidden hover:-translate-y-1 hover:shadow-2xl transition-all duration-300
+        /* biar pas mobile card tidak kebesaran */
+        max-w-[420px]"
       >
         <div
           onClick={() => setShowMenuFullScreen(true)}
