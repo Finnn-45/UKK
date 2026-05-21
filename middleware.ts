@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import jwt from 'jsonwebtoken'
 
 export const config = {
   matcher: [
@@ -12,10 +11,47 @@ export const config = {
   ],
 }
 
-export function middleware(req: NextRequest) {
+function base64UrlToUint8Array(value: string) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/')
+  const padding = normalized.length % 4
+  const padded = padding === 0 ? normalized : normalized + '='.repeat(4 - padding)
+  const raw = atob(padded)
+  const output = new Uint8Array(raw.length)
+  for (let i = 0; i < raw.length; ++i) {
+    output[i] = raw.charCodeAt(i)
+  }
+  return output
+}
+
+async function verifyJwt(token: string, secret: string) {
+  const [header, payload, signature] = token.split('.')
+  if (!header || !payload || !signature) return null
+
+  const encoder = new TextEncoder()
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['verify']
+  )
+
+  const valid = await crypto.subtle.verify(
+    'HMAC',
+    key,
+    base64UrlToUint8Array(signature),
+    encoder.encode(`${header}.${payload}`)
+  )
+
+  if (!valid) return null
+
+  const decodedPayload = atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
+  return JSON.parse(decodedPayload)
+}
+
+export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname.replace(/\/$/, '') || '/'
 
-  // support both custom `token` cookie and NextAuth session cookie
   let token = req.cookies.get('token')?.value
   const nextAuthCookie =
     req.cookies.get('__Host-next-auth.session-token')?.value ||
@@ -25,64 +61,46 @@ export function middleware(req: NextRequest) {
   if (!token && nextAuthCookie) token = nextAuthCookie
 
   const isAdminRoute = pathname.startsWith('/admin')
-
   const isAdminLoginPage = pathname === '/admin/login'
   const isUserLoginPage = pathname === '/login'
 
+  const authToken = token
 
-  // If user already has a valid token and tries to open the login page,
-  // redirect them away to prevent re-login page access.
-  if ((isAdminLoginPage || isUserLoginPage) && token) {
-
+  if ((isAdminLoginPage || isUserLoginPage) && authToken) {
     try {
-      let decoded: any = null
-      try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET!)
-      } catch (_) {
-        decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET!)
-      }
-
+      const secret = process.env.JWT_SECRET ?? ''
+      const decoded = await verifyJwt(authToken, secret)
       if (decoded && decoded.role === 'ADMIN') {
         return NextResponse.redirect(new URL('/admin', req.url))
       }
-    } catch (_) {
-      // ignore, allow showing login page
+    } catch {
+      // ignore and allow login page
     }
   }
 
-  // kalau buka admin tapi belum login
   if (isAdminRoute && !isAdminLoginPage) {
-
-
-    if (!token) {
+    if (!authToken) {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
 
     try {
-      // try verifying with either custom JWT secret or NextAuth secret
-      let decoded: any = null
-
-      try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET!)
-      } catch (e) {
-        // fallback to NextAuth secret
-        decoded = jwt.verify(token, process.env.NEXTAUTH_SECRET!)
-      }
-
-      // if role missing or not admin, redirect
+      const secret = process.env.JWT_SECRET ?? ''
+      const decoded = await verifyJwt(authToken, secret)
       if (!decoded || decoded.role !== 'ADMIN') {
-        return NextResponse.redirect(new URL('/', req.url))
+        return NextResponse.redirect(new URL('/admin/login', req.url))
       }
-
     } catch {
       return NextResponse.redirect(new URL('/admin/login', req.url))
     }
   }
 
-  // kalau buka checkout/order user tapi belum login - redirect ke login
-  const isProtectedUserRoute = pathname === '/checkout' || pathname.startsWith('/checkout/') || pathname === '/orders' || pathname.startsWith('/orders/')
-  if (isProtectedUserRoute && !token) {
-    // redirect ke login user (dibuat: /login)
+  const isProtectedUserRoute =
+    pathname === '/checkout' ||
+    pathname.startsWith('/checkout/') ||
+    pathname === '/orders' ||
+    pathname.startsWith('/orders/')
+
+  if (isProtectedUserRoute && !authToken) {
     return NextResponse.redirect(new URL('/login', req.url))
   }
 

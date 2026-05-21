@@ -128,20 +128,24 @@ async function main() {
     ],
   });
   
-// 👤 SEED ADMIN USER (tambahan baru)
-  const hashed = await bcrypt.hash('admin123', 10)
+// 👤 SEED ADMIN USER
+  const hashed = await bcrypt.hash('admin123', 8) // Optimized cost factor
 
   await prisma.user.upsert({
     where: { email: "admin@catering.com" },
-    update: { password: hashed }, // Pastikan password di-update ke versi hashed
+    update: { 
+      password: hashed,
+      role: 'ADMIN' // Ensure role is ADMIN
+    },
     create: {
       name: "Admin Catering",
       email: "admin@catering.com",
       password: hashed,
+      role: 'ADMIN' // Set role to ADMIN
     },
   });
 
-  console.log("✅ Admin user created: admin@catering.com / admin123 (hashed)");
+  console.log("✅ Admin user created/updated: admin@catering.com / admin123");
 }
 
 main()

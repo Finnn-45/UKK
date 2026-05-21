@@ -84,9 +84,6 @@ export default function HomeClient({
             className="relative bg-white p-3 rounded-xl md:rounded-2xl shadow-sm border border-gray-100 active:scale-95 transition-transform"
           >
             <ShoppingBag size={20} className="text-gray-700" />
-            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center border-2 border-white font-bold">
-              {0}
-            </span>
           </Link>
         </div>
       </nav>
